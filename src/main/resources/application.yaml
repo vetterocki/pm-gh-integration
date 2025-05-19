@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: pm-gh-integration
+  kafka:
+    bootstrap-servers: localhost:29092
+  data:
+    mongodb:
+      database: pm_gh
+      username: example
+      password: example
+      authentication-database: admin
+      port: 27017
+      host: localhost
+server:
+  servlet:
+    context-path: /api/v1
