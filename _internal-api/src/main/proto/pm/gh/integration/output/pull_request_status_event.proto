@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pm.gh.integration.output;
+
+import "pm/gh/integration/common/title_composition.proto";
+import "pm/gh/integration/common/actor.proto";
+import "pm/gh/integration/common/pull_request_status.proto";
+
+option java_multiple_files = true;
+
+message PullRequestStatusEvent {
+  common.Actor actor = 1;
+  string htmlUrl = 2;
+  common.TitleComposition title_composition = 3;
+  common.PullRequestStatus pull_request_status = 4;
+  string pull_request_number = 5;
+  string repository_name = 6;
+}

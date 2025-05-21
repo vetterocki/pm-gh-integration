@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pm.gh.integration.output;
+
+import "pm/gh/integration/common/title_composition.proto";
+import "pm/gh/integration/common/actor.proto";
+
+option java_multiple_files = true;
+
+
+message WorkflowRunCompletedEvent {
+  common.Actor actor = 1;
+  string html_url = 2;
+  string conclusion = 3;
+  common.TitleComposition title_composition = 4;
+  string repository_name = 5;
+}

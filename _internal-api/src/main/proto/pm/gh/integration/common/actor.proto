@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pm.gh.integration.common;
+
+option java_multiple_files = true;
+
+message Actor {
+  string email = 1;
+  string name = 2;
+  string login = 3;
+}

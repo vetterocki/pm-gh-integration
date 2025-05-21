@@ -3,6 +3,10 @@ spring:
     name: pm-gh-integration
   kafka:
     bootstrap-servers: localhost:29092
+    consumer:
+      properties:
+        session.timeout.ms: 10000
+        max.poll.interval.ms: 10000
   data:
     mongodb:
       database: pm_gh

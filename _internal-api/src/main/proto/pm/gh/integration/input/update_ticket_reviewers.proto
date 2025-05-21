@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package pm.gh.integration.input;
+
+import "pm/gh/integration/common/title_composition.proto";
+import "pm/gh/integration/common/actor.proto";
+
+option java_multiple_files = true;
+
+message UpdateTicketReviewersEvent {
+  repeated common.Actor reviewers = 1;
+  common.TitleComposition title_composition = 2;
+  Action action = 3;
+}
+
+enum Action {
+  ACTION_UNSPECIFIED = 0;
+  ACTION_ASSIGNED = 1;
+  ACTION_REMOVED = 2;
+}

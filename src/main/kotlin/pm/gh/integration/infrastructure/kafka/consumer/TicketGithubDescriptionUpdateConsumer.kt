@@ -7,43 +7,43 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import pm.gh.integration.application.service.TicketService
 import pm.gh.integration.infrastructure.mongo.model.Ticket
-import pm.gh.integration.input.UpdateTicketStatusEvent
+import pm.gh.integration.input.UpdateTicketGithubDescriptionEvent
 import reactor.core.publisher.Mono
 import reactor.kafka.receiver.KafkaReceiver
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-class TicketStatusUpdateConsumer(
-    @Qualifier("updateTicketStatusReceiver")
+class TicketGithubDescriptionUpdateConsumer(
+    @Qualifier("updateTicketGithubDescriptionReceiver")
     private val kafkaReceiver: KafkaReceiver<String, ByteArray>,
     private val ticketService: TicketService,
 ) {
 
     @EventListener(ApplicationReadyEvent::class)
-    fun listenToTicketUpdateStatusTopic() {
+    fun listenToTicketUpdateGithubDescriptionTopic() {
         kafkaReceiver.receive()
             .flatMap { receiverRecord ->
                 receiverRecord.toMono()
-                    .map { UpdateTicketStatusEvent.parseFrom(it.value()) }
-                    .flatMap { performStatusUpdate(it) }
+                    .map { UpdateTicketGithubDescriptionEvent.parseFrom(it.value()) }
+                    .flatMap { performGithubDescriptionUpdate(it) }
                     .doFinally { receiverRecord.receiverOffset().acknowledge() }
 
             }
             .subscribe()
     }
 
-    private fun performStatusUpdate(updateTicketStatusEvent: UpdateTicketStatusEvent): Mono<Ticket> {
-        return updateTicketStatusEvent.run {
-            ticketService.updateTicketStatus(
+    private fun performGithubDescriptionUpdate(event: UpdateTicketGithubDescriptionEvent): Mono<Ticket> {
+        return event.run {
+            ticketService.updateTicketGithubDescription(
                 ticketIdentifier = titleComposition.ticketIdentifier,
-                status = status
+                description
             ).switchIfEmpty {
                 Mono.defer {
                     logger.warn(
-                        "No ticket {} found, skipping updating ticket status {}",
+                        "No ticket {} found, skipping updating ticket github description {}",
                         titleComposition,
-                        status
+                        description
                     )
                     Mono.empty()
                 }

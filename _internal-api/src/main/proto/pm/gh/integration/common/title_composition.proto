@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pm.gh.integration.common;
+
+option java_multiple_files = true;
+
+message TitleComposition {
+  optional string project_key = 1;
+  optional string ticket_identifier = 2;
+  string ticket_summary = 3;
+}

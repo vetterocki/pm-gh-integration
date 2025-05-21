@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pm.gh.integration.common;
+
+option java_multiple_files = true;
+
+message PullRequestStatus {
+  string branch_ref = 1;
+  Status status = 2;
+}
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_MERGED = 1;
+  STATUS_CLOSED = 2;
+  STATUS_OPENED = 3;
+  STATUS_DRAFT = 4;
+}
