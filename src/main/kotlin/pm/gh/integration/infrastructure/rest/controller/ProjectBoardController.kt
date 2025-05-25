@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import pm.gh.integration.application.service.ProjectBoardService
 import pm.gh.integration.infrastructure.rest.dto.ProjectBoardDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectBoardMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectBoardMapper.toModel
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 
@@ -47,5 +49,10 @@ class ProjectBoardController(private val projectBoardService: ProjectBoardServic
     @ResponseStatus(HttpStatus.OK)
     fun update(@PathVariable id: String, projectBoardDto: ProjectBoardDto): Mono<ProjectBoardDto> {
         return projectBoardService.update(id, projectBoardDto).map { it.toDto() }
+    }
+
+    @GetMapping
+    fun findAllByProjectId(@RequestParam projectId: String): Flux<ProjectBoardDto> {
+        return projectBoardService.findAllByProjectId(projectId).map { it.toDto() }
     }
 }

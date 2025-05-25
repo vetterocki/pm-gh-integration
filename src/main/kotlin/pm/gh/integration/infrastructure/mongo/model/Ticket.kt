@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import pm.gh.integration.domain.PullRequest
 import pm.gh.integration.domain.WorkflowRun
 import pm.gh.integration.infrastructure.mongo.model.Ticket.Companion.COLLECTION_NAME
+import java.time.Instant
 
 
 @TypeAlias("Ticket")
@@ -16,12 +17,15 @@ data class Ticket(
     val id: ObjectId?,
     val ticketIdentifier: String?,
     val projectId: ObjectId?,
+    val projectBoardId: ObjectId?,
+    val createdAt: Instant,
     val summary: String,
     val description: String?,
     val reporterId: ObjectId?,
     val assigneeId: ObjectId?,
     val reviewerIds: List<ObjectId>?,
     val linkedTicketIds: List<ObjectId>?,
+    val labels: List<ProjectLabel>?,
     val linkedPullRequests: List<PullRequest>?,
     val linkedWorkflowRuns: List<WorkflowRun>?,
     val priority: TicketPriority = TicketPriority.MINOR,
@@ -40,7 +44,3 @@ data class Ticket(
         const val SEQUENCE_NAME = "ticket_sequence"
     }
 }
-
-// TODO GitHub reviewer assigned = ticket List<reviewerId> updated
-// TODO PR Description updated = ticket extra field updated
-// optional TODO push to branch with valid ticket identifier -> ticket List<string> branches updated

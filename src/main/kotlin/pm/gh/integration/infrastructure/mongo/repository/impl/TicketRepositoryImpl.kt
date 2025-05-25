@@ -1,9 +1,11 @@
 package pm.gh.integration.infrastructure.mongo.repository.impl
 
 import org.bson.types.ObjectId
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findAndModify
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.findOne
@@ -17,6 +19,7 @@ import pm.gh.integration.domain.PullRequest
 import pm.gh.integration.domain.WorkflowRun
 import pm.gh.integration.infrastructure.mongo.model.Ticket
 import pm.gh.integration.infrastructure.mongo.repository.TicketRepository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
@@ -43,6 +46,29 @@ class TicketRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : T
         return mongoTemplate.findOne<Ticket>(query(where(Ticket::ticketIdentifier.name).isEqualTo(ticketIdentifier)))
     }
 
+    override fun findAllByTicketIdentifierContaining(ticketIdentifier: String): Flux<Ticket> {
+        val regex = ".*$ticketIdentifier.*"
+        return mongoTemplate.find<Ticket>(
+            query(where(Ticket::ticketIdentifier.name).regex(regex, "i")),
+        )
+    }
+
+    override fun findAllByProjectBoardId(projectBoardId: String): Flux<Ticket> {
+        return mongoTemplate.find<Ticket>(
+            query(
+                where(Ticket::projectBoardId.name).isEqualTo(projectBoardId.toObjectId()),
+            ).with(Sort.by(Sort.Direction.ASC, Ticket::createdAt.name))
+        )
+    }
+
+    override fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>> {
+        return mongoTemplate.find<Ticket>(
+            query(where(Ticket::projectBoardId.name).isEqualTo(projectBoardId.toObjectId()))
+        )
+            .groupBy { it.status.name }
+            .collectMap({ it.key() }, { it })
+    }
+
     override fun updateTicketStatus(ticketIdentifier: String, status: String): Mono<Ticket> {
         return updateTicketField(ticketIdentifier, Update().set(Ticket::status.name, status))
     }
@@ -59,7 +85,8 @@ class TicketRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : T
         return updateTicketField(ticketIdentifier, Update().push(Ticket::linkedPullRequests.name, pullRequest))
     }
 
-    override fun updateTicketWorkflowRuns(ticketIdentifier: String, workflowRun: WorkflowRun
+    override fun updateTicketWorkflowRuns(
+        ticketIdentifier: String, workflowRun: WorkflowRun,
     ): Mono<Ticket> {
         return updateTicketField(ticketIdentifier, Update().push(Ticket::linkedWorkflowRuns.name, workflowRun))
     }

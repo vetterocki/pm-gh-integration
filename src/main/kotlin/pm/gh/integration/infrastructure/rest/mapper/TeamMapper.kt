@@ -9,9 +9,10 @@ object TeamMapper {
     fun Team.toDto(): TeamDto {
         return TeamDto(
             name = name,
-            projectManagerId = projectManagerId.toString(),
             teamMemberIds = teamMemberIds?.map { it.toString() },
-            projectIds = projectIds?.map { it.toString() }
+            projectIds = projectIds?.map { it.toString() },
+            id = id.toString(),
+            projectManagerName = projectManager?.fullName.orEmpty()
         )
     }
 
@@ -19,17 +20,16 @@ object TeamMapper {
     fun TeamDto.toModel(): Team {
         return Team(
             name = name,
-            projectManagerId = projectManagerId?.toObjectId(),
             teamMemberIds = teamMemberIds?.map { it.toObjectId() },
             projectIds = projectIds?.map { it.toObjectId() },
-            id = null
+            id = null,
+            projectManager = null
         )
     }
 
     fun Team.partialUpdate(teamUpdateDto: TeamUpdateDto): Team {
         return copy(
             name = teamUpdateDto.name ?: name,
-            projectManagerId = teamUpdateDto.projectManagerId?.toObjectId() ?: projectManagerId,
         )
     }
 }

@@ -2,20 +2,18 @@ package pm.gh.integration.infrastructure.mongo.repository.impl
 
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
-import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.findOne
-import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
 import pm.gh.integration.application.util.toObjectId
-import pm.gh.integration.domain.Actor
 import pm.gh.integration.infrastructure.mongo.model.Team
-import pm.gh.integration.infrastructure.mongo.model.TeamMember
 import pm.gh.integration.infrastructure.mongo.repository.TeamRepository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
@@ -34,6 +32,14 @@ class TeamRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : Tea
 
     override fun findById(teamId: String): Mono<Team> {
         return mongoTemplate.findById(teamId.toObjectId())
+    }
+
+    override fun findByName(name: String): Mono<Team> {
+        return mongoTemplate.findOne(query(where(Team::name.name).isEqualTo(name)))
+    }
+
+    override fun findAll(): Flux<Team> {
+        return mongoTemplate.findAll<Team>()
     }
 
     private fun qetCriteriaById(id: String): Query {

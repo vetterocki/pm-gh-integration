@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import pm.gh.integration.application.service.TeamService
@@ -17,6 +18,7 @@ import pm.gh.integration.infrastructure.rest.dto.TeamDto
 import pm.gh.integration.infrastructure.rest.dto.TeamUpdateDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMapper.toModel
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController
@@ -25,7 +27,24 @@ class TeamController(private val teamService: TeamService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@Valid @RequestBody teamDto: TeamDto): Mono<TeamDto> {
-        return teamService.create(teamDto.toModel()).let { it.map { created -> created.toDto() } }
+        return teamService.create(
+            teamDto.toModel(),
+            projectManagerName = teamDto.projectManagerName
+        ).let { it.map { created -> created.toDto() } }
+    }
+
+    @GetMapping
+    fun findByName(@RequestParam teamName: String): Mono<ResponseEntity<TeamDto>> {
+        println("inside find by team")
+        return teamService.findByName(teamName)
+            .map { it.toDto() }
+            .map { ResponseEntity.ok(it) }
+            .defaultIfEmpty(ResponseEntity.notFound().build())
+    }
+
+    @GetMapping("/all")
+    fun findAll(): Flux<TeamDto> {
+        return teamService.findAll().map { it.toDto() }
     }
 
     @GetMapping("/{id}")

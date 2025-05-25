@@ -28,15 +28,19 @@ class ProjectController(private val projectService: ProjectService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@Valid @RequestBody projectDto: ProjectDto): Mono<ProjectDto> {
-        return projectService.create(projectDto.toModel()).let { it.map { created -> created.toDto() } }
+        return projectService.create(
+            projectDto.toModel(),
+            teamName = projectDto.teamName,
+            projectOwnerName = projectDto.projectOwnerName
+        ).let { it.map { created -> created.toDto() } }
     }
 
-
-    @GetMapping("/{member-id}")
+    @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    fun findAllByTeamMemberId(@PathVariable("member-id") memberId: String): Flux<ProjectDto> {
-        return projectService.findAllByTeamMemberId(memberId).map { it.toDto() }
+    fun findAll(): Flux<ProjectDto> {
+        return projectService.findAll().map { it.toDto() }
     }
+
 
     @GetMapping
     fun findByName(@RequestParam projectName: String): Mono<ResponseEntity<ProjectDto>> {

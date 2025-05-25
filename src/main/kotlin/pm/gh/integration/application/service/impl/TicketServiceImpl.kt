@@ -1,6 +1,5 @@
 package pm.gh.integration.application.service.impl
 
-import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import pm.gh.integration.application.service.ProjectService
 import pm.gh.integration.application.service.TeamMemberService
@@ -16,7 +15,6 @@ import pm.gh.integration.infrastructure.rest.dto.TicketUpdateDto
 import pm.gh.integration.infrastructure.rest.mapper.TicketMapper.partialUpdate
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.cast
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
@@ -66,6 +64,18 @@ class TicketServiceImpl(
         return ticketRepository.findByTicketIdentifier(ticketIdentifier)
     }
 
+    override fun findAllByTicketIdentifierContaining(ticketIdentifier: String): Flux<Ticket> {
+        return ticketRepository.findAllByTicketIdentifierContaining(ticketIdentifier)
+    }
+
+    override fun findAllByProjectBoardId(projectBoardId: String): Flux<Ticket> {
+        return ticketRepository.findAllByProjectBoardId(projectBoardId)
+    }
+
+    override fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>> {
+        return ticketRepository.findAllByProjectBoardIdGroupedByStatus(projectBoardId)
+    }
+
     override fun updateTicketStatus(ticketIdentifier: String, status: String): Mono<Ticket> {
         return ticketRepository.updateTicketStatus(ticketIdentifier, status)
     }
@@ -85,7 +95,7 @@ class TicketServiceImpl(
             .flatMap { teamMemberService.findByGithubCredentials(it) }
             .mapNotNull { it.id }
             .collectList()
-            .flatMap { ticketRepository.updateTicketReviewers(ticketIdentifier, it)}
+            .flatMap { ticketRepository.updateTicketReviewers(ticketIdentifier, it) }
 
     }
 

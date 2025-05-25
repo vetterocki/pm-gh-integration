@@ -2,6 +2,7 @@ package pm.gh.integration.infrastructure.mongo.repository
 
 import pm.gh.integration.domain.Actor
 import pm.gh.integration.infrastructure.mongo.model.TeamMember
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface TeamMemberRepository {
@@ -10,4 +11,6 @@ interface TeamMemberRepository {
     fun deleteById(teamMemberId: String): Mono<Unit>
     fun findById(teamId: String): Mono<TeamMember>
     fun findByGithubCredentials(actor: Actor): Mono<TeamMember>
+    fun findByNameOrEmail(credential: String): Mono<TeamMember>
+    fun findAllByTeamId(teamId: String): Flux<TeamMember>
 }

@@ -1,5 +1,6 @@
 package pm.gh.integration.infrastructure.mongo.repository.impl
 
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregate
 import org.springframework.data.mongodb.core.aggregation.Aggregation.lookup
@@ -8,9 +9,11 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregat
 import org.springframework.data.mongodb.core.aggregation.Aggregation.project
 import org.springframework.data.mongodb.core.aggregation.Aggregation.unwind
 import org.springframework.data.mongodb.core.aggregation.Fields
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
@@ -23,6 +26,12 @@ import reactor.core.publisher.Mono
 
 @Repository
 class ProjectRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : ProjectRepository {
+    override fun findAll(): Flux<Project> {
+        val query = Query().with(Sort.by(Sort.Direction.ASC, Project::fullName.name))
+        return mongoTemplate.find<Project>(query)
+    }
+
+
     override fun create(project: Project): Mono<Project> {
         return mongoTemplate.insert(project)
     }
@@ -30,7 +39,7 @@ class ProjectRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : 
     override fun findAllByTeamMemberId(teamMemberId: String): Flux<Project> {
         val aggregation = newAggregation(
             lookup().from(Team.COLLECTION_NAME)
-                .localField(Project::teamId.name)
+                .localField(Project::team.name)
                 .foreignField(Fields.UNDERSCORE_ID)
                 .`as`("aggregatedTeam"),
             unwind("aggregatedTeam"),

@@ -1,6 +1,7 @@
 package pm.gh.integration.infrastructure.mongo.repository
 
 import pm.gh.integration.infrastructure.mongo.model.Team
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface TeamRepository {
@@ -8,4 +9,6 @@ interface TeamRepository {
     fun update(team: Team): Mono<Team>
     fun deleteById(teamId: String): Mono<Unit>
     fun findById(teamId: String): Mono<Team>
+    fun findByName(name: String): Mono<Team>
+    fun findAll(): Flux<Team>
 }

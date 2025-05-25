@@ -14,8 +14,8 @@ data class Project(
     val fullName: String,
     val key: String,
     val projectBoardIds: List<ObjectId>? = listOf(),
-    val teamId: ObjectId?,
-    val projectOwnerId: ObjectId?,
+    val team: Team?,
+    val projectOwner: TeamMember?,
     val projectLabelIds: List<ObjectId>? = listOf(),
 ) {
     companion object {

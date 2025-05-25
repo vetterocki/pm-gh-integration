@@ -11,7 +11,9 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
-class TeamMemberServiceImpl(private val teamMemberRepository: TeamMemberRepository) : TeamMemberService {
+class TeamMemberServiceImpl(
+    private val teamMemberRepository: TeamMemberRepository,
+) : TeamMemberService {
     override fun create(teamMember: TeamMember): Mono<TeamMember> {
         return teamMemberRepository.create(teamMember)
     }
@@ -36,5 +38,9 @@ class TeamMemberServiceImpl(private val teamMemberRepository: TeamMemberReposito
 
     override fun findByGithubCredentials(actor: Actor): Mono<TeamMember> {
         return teamMemberRepository.findByGithubCredentials(actor)
+    }
+
+    override fun findByNameOrEmail(credential: String): Mono<TeamMember> {
+        return teamMemberRepository.findByNameOrEmail(credential)
     }
 }

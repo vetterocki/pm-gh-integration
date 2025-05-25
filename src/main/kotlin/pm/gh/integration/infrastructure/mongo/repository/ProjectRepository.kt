@@ -5,6 +5,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface ProjectRepository {
+    fun findAll(): Flux<Project>
     fun create(project: Project): Mono<Project>
     fun findAllByTeamMemberId(teamMemberId: String): Flux<Project>
     fun findByName(projectName: String): Mono<Project>

@@ -1,0 +1,92 @@
+@startuml "Project Management System - Layered Architecture"
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+cloud "GitHub" as github {
+    component [GitHub API] as github_api
+}
+
+node "Frontend" <<UI>> {
+    node "Presentation Layer" as fl_pres {
+        component [Views/Pages] as views
+        component [Shared Components] as shared
+    }
+
+    node "Application Layer" as fl_app {
+        component [State Management] as state
+        component [Route Management] as routes
+    }
+
+    node "Infrastructure Layer" as fl_infra {
+        component [HTTP Client] as http_client
+    }
+}
+
+node "PM Integration Service" <<Domain Service>> {
+    node "Domain Layer" as pm_domain {
+    }
+
+    node "Application Layer" as pm_app <<Service>> {
+        component [Domain Services] as domain_services
+    }
+
+    node "Infrastructure Layer" as pm_infra {
+        component [Spring Security Auth] as security
+        database "MongoDB" <<Database>> as mongodb
+        component [Kafka Event Consumers] as kafka_event_consumers
+
+        node "REST API" as pm_rest {
+            component [WebFlux Reactive REST] as rest_layer
+        }
+    }
+}
+
+queue "Kafka" <<Broker>> as kafka {
+    component [Event Bus] as kafka_bus
+}
+
+node "GitHub Integration App" <<Integration Service>> {
+    node "Domain Layer" as gh_domain
+
+    node "Infrastructure Layer" as gh_infra {
+        component [GitHub Event Handlers] as github_handlers
+        component [Kafka Event Publishers] as kafka_publishers
+    }
+
+    node "Application Layer" as gh_app <<Service>> {
+        component [GitHub Event Services] as gh_services
+    }
+}
+
+' Layout hints
+pm_infra -[hidden]right- kafka
+kafka -[hidden]right- gh_infra
+
+' Frontend internal connections
+views ..> shared
+views ..> state
+routes ..> views
+state ..> http_client
+
+' Frontend to Backend connection
+http_client --> rest_layer : "HTTP/REST"
+
+' PM Service connections
+rest_layer --> security : "Authenticate"
+rest_layer --> domain_services
+domain_services --> pm_domain
+domain_services --> mongodb : "Read/Write"
+kafka_event_consumers -[thickness=1]-> domain_services
+
+' Kafka connections
+kafka_event_consumers -[thickness=1]up-> kafka_bus: "Consume"
+kafka_publishers --[thickness=1]up-> kafka_bus: "Publish"
+
+' GitHub App connections
+github_api ---> github_handlers: "Webhook"
+github_handlers --> gh_services
+gh_services --> gh_domain
+gh_services --> kafka_publishers
+
+@enduml

@@ -11,7 +11,7 @@ import pm.gh.integration.infrastructure.mongo.model.Team.Companion.COLLECTION_NA
 data class Team(
     @Id val id: ObjectId?,
     val name: String,
-    val projectManagerId: ObjectId?,
+    val projectManager: TeamMember?,
     val teamMemberIds: List<ObjectId>?,
     val projectIds: List<ObjectId>?,
 ) {

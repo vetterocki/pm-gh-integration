@@ -1,7 +1,9 @@
 package pm.gh.integration.infrastructure.mongo.repository.impl
 
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Repository
 import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.infrastructure.mongo.model.ProjectBoard
 import pm.gh.integration.infrastructure.mongo.repository.ProjectBoardRepository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
@@ -29,5 +32,12 @@ class ProjectBoardRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplat
 
     override fun update(projectBoard: ProjectBoard): Mono<ProjectBoard> {
         return mongoTemplate.save(projectBoard)
+    }
+
+    override fun findAllByProjectId(projectId: String): Flux<ProjectBoard> {
+        return mongoTemplate.find<ProjectBoard>(
+            query(where(ProjectBoard::projectId.name).isEqualTo(projectId.toObjectId()))
+                .with(Sort.by(Sort.Direction.ASC, ProjectBoard::name.name))
+        )
     }
 }

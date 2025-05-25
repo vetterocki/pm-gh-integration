@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import pm.gh.integration.application.service.TeamMemberService
@@ -25,7 +26,16 @@ class TeamMemberController(private val teamMemberService: TeamMemberService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@Valid @RequestBody teamDto: TeamMemberDto): Mono<TeamMemberDto> {
-        return teamMemberService.create(teamDto.toModel()).let { it.map { created -> created.toDto() } }
+        return teamMemberService.create(teamDto.toModel()).map { it.toDto() }
+    }
+
+    @GetMapping
+    fun findByName(@RequestParam teamMemberName: String): Mono<ResponseEntity<TeamMemberDto>> {
+        println("here")
+        return teamMemberService.findByNameOrEmail(teamMemberName)
+            .map { it.toDto() }
+            .map { ResponseEntity.ok(it) }
+            .defaultIfEmpty(ResponseEntity.notFound().build())
     }
 
     @GetMapping("/{id}")

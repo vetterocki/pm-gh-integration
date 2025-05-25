@@ -2,6 +2,7 @@ package pm.gh.integration.infrastructure.mongo.repository.impl
 
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria
@@ -13,6 +14,7 @@ import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.domain.Actor
 import pm.gh.integration.infrastructure.mongo.model.TeamMember
 import pm.gh.integration.infrastructure.mongo.repository.TeamMemberRepository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
@@ -43,6 +45,27 @@ class TeamMemberRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate)
                     where(TeamMember::loginInGithub.name).isEqualTo(actor.login),
                     where(TeamMember::fullName.name).isEqualTo(actor.name)
                 )
+            )
+        )
+    }
+
+    override fun findByNameOrEmail(credential: String): Mono<TeamMember> {
+        return mongoTemplate.findOne<TeamMember>(
+            query(
+                Criteria().orOperator(
+                    where(TeamMember::email.name).isEqualTo(credential),
+                    where(TeamMember::fullName.name).isEqualTo(credential)
+                )
+            )
+        )
+    }
+
+    override fun findAllByTeamId(teamId: String): Flux<TeamMember> {
+        return mongoTemplate.find<TeamMember>(
+            query(
+                where(
+                    TeamMember::teamId.name
+                ).isEqualTo(teamId.toObjectId())
             )
         )
     }

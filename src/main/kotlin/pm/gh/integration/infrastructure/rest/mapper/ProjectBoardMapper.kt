@@ -9,7 +9,8 @@ object ProjectBoardMapper {
         return ProjectBoardDto(
             name = name,
             projectId = projectId.toString(),
-            ticketIds = ticketIds?.map { it.toString() }
+            ticketIds = ticketIds?.map { it.toString() },
+            id = id.toString()
         )
     }
 

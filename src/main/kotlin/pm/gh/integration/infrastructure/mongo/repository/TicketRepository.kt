@@ -4,6 +4,7 @@ import org.bson.types.ObjectId
 import pm.gh.integration.domain.PullRequest
 import pm.gh.integration.domain.WorkflowRun
 import pm.gh.integration.infrastructure.mongo.model.Ticket
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface TicketRepository {
@@ -12,6 +13,9 @@ interface TicketRepository {
     fun deleteById(id: String): Mono<Unit>
     fun update(ticket: Ticket): Mono<Ticket>
     fun findByTicketIdentifier(ticketIdentifier: String): Mono<Ticket>
+    fun findAllByTicketIdentifierContaining(ticketIdentifier: String): Flux<Ticket>
+    fun findAllByProjectBoardId(projectBoardId: String): Flux<Ticket>
+    fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>>
     fun updateTicketStatus(ticketIdentifier: String, status: String): Mono<Ticket>
     fun updateTicketGithubDescription(ticketIdentifier: String, githubDescription: String): Mono<Ticket>
     fun updateTicketReviewers(ticketIdentifier: String, reviewers: List<ObjectId?>): Mono<Ticket>

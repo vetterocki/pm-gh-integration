@@ -4,7 +4,10 @@ import pm.gh.integration.infrastructure.mongo.model.ProjectLabel
 import pm.gh.integration.infrastructure.rest.dto.ProjectLabelDto
 
 object ProjectLabelMapper {
-    fun ProjectLabel.toDto(): ProjectLabelDto = ProjectLabelDto(name)
+    fun ProjectLabel.toDto(): ProjectLabelDto = ProjectLabelDto(
+        id = id.toString(),
+        name = name
+    )
 
     fun ProjectLabelDto.toModel(): ProjectLabel = ProjectLabel(id = null, name = name)
 

@@ -6,6 +6,9 @@ import pm.gh.integration.infrastructure.mongo.model.Ticket.TicketPriority
 import pm.gh.integration.infrastructure.mongo.model.TicketStatus
 import pm.gh.integration.infrastructure.rest.dto.TicketDto
 import pm.gh.integration.infrastructure.rest.dto.TicketUpdateDto
+import pm.gh.integration.infrastructure.rest.mapper.ProjectLabelMapper.toDto
+import pm.gh.integration.infrastructure.rest.mapper.ProjectLabelMapper.toModel
+import java.time.Instant
 
 object TicketMapper {
     fun Ticket.toDto(): TicketDto {
@@ -17,7 +20,10 @@ object TicketMapper {
             assigneeId = assigneeId.toString(),
             linkedTicketIds = linkedTicketIds?.map { it.toString() },
             priority = priority.name,
-            status = status.name
+            status = status.name,
+            id = id.toString(),
+            projectBoardId = projectBoardId.toString(),
+            labels = labels?.map { it.toDto() },
         )
     }
 
@@ -25,6 +31,7 @@ object TicketMapper {
         return Ticket(
             id = null,
             projectId = projectId.toObjectId(),
+            projectBoardId = projectBoardId.toObjectId(),
             summary = summary,
             description = description,
             reporterId = reporterId.toObjectId(),
@@ -35,12 +42,13 @@ object TicketMapper {
                 id = null,
                 name = status
             ),
-            // TODO remodel DTO and change mapping
             ticketIdentifier = null,
             linkedPullRequests = null,
             linkedWorkflowRuns = null,
             reviewerIds = null,
-            githubDescription = TODO()
+            githubDescription = null,
+            createdAt = Instant.now(),
+            labels = labels?.map { it.toModel() }
         )
     }
 

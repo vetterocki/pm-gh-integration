@@ -10,10 +10,11 @@ object ProjectMapper {
         return ProjectDto(
             fullName = fullName,
             projectBoardIds = projectBoardIds?.map { it.toString() },
-            teamId = teamId.toString(),
-            projectOwnerId = projectOwnerId.toString(),
             projectLabelIds = projectLabelIds?.map { it.toString() },
-            key = key
+            key = key,
+            teamName = team?.name.orEmpty(),
+            projectOwnerName = projectOwner?.fullName.orEmpty(),
+            id = id.toString()
         )
     }
 
@@ -22,8 +23,8 @@ object ProjectMapper {
             id = null,
             fullName = fullName,
             projectBoardIds = projectBoardIds?.map { it.toObjectId() },
-            teamId = teamId.toObjectId(),
-            projectOwnerId = projectOwnerId.toObjectId(),
+            team = null,
+            projectOwner = null,
             projectLabelIds = projectLabelIds?.map { it.toObjectId() },
             key = key
         )
@@ -32,9 +33,7 @@ object ProjectMapper {
     fun Project.partialUpdate(updatedProject: ProjectUpdateDto): Project {
         return copy(
             fullName = updatedProject.fullName ?: fullName,
-            projectOwnerId = updatedProject.projectOwnerId?.toObjectId() ?: projectOwnerId,
-            teamId = updatedProject.teamId?.toObjectId() ?: teamId,
-            key = updatedProject.key ?: key
+            key = updatedProject.key ?: key,
         )
     }
 }

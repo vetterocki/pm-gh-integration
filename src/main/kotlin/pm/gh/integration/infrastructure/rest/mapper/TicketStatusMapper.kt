@@ -4,7 +4,10 @@ import pm.gh.integration.infrastructure.mongo.model.TicketStatus
 import pm.gh.integration.infrastructure.rest.dto.TicketStatusDto
 
 object TicketStatusMapper {
-    fun TicketStatus.toDto(): TicketStatusDto = TicketStatusDto(name)
+    fun TicketStatus.toDto(): TicketStatusDto = TicketStatusDto(
+        id = id.toString(),
+        name = name
+    )
 
     fun TicketStatusDto.toModel(): TicketStatus = TicketStatus(id = null, name = name)
 

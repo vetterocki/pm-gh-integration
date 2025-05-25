@@ -6,6 +6,7 @@ import pm.gh.integration.infrastructure.mongo.model.ProjectBoard
 import pm.gh.integration.infrastructure.mongo.repository.ProjectBoardRepository
 import pm.gh.integration.infrastructure.rest.dto.ProjectBoardDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectBoardMapper.partialUpdate
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 
@@ -31,5 +32,9 @@ class ProjectBoardServiceImpl(private val projectBoardRepository: ProjectBoardRe
 
     override fun getById(id: String): Mono<ProjectBoard> {
         return findById(id).switchIfEmpty { Mono.error { RuntimeException("Project board not found by id $id") } }
+    }
+
+    override fun findAllByProjectId(projectId: String): Flux<ProjectBoard> {
+        return projectBoardRepository.findAllByProjectId(projectId)
     }
 }

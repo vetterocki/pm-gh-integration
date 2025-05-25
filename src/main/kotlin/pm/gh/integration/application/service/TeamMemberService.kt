@@ -12,4 +12,5 @@ interface TeamMemberService {
     fun findById(teamId: String): Mono<TeamMember>
     fun getById(id: String): Mono<TeamMember>
     fun findByGithubCredentials(actor: Actor): Mono<TeamMember>
+    fun findByNameOrEmail(credential: String): Mono<TeamMember>
 }
