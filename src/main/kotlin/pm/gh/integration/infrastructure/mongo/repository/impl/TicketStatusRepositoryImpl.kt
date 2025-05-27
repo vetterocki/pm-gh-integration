@@ -3,6 +3,7 @@ package pm.gh.integration.infrastructure.mongo.repository.impl
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
 import org.springframework.data.mongodb.core.findById
+import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.isEqualTo
@@ -29,6 +30,10 @@ class TicketStatusRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplat
 
     override fun update(ticketStatus: TicketStatus): Mono<TicketStatus> {
         return mongoTemplate.save(ticketStatus)
+    }
+
+    override fun findByName(name: String): Mono<TicketStatus> {
+        return mongoTemplate.findOne<TicketStatus>(query(where(TicketStatus::name.name).isEqualTo(name)))
     }
 
 }

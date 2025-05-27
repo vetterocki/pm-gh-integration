@@ -17,6 +17,7 @@ import pm.gh.integration.application.service.ProjectLabelService
 import pm.gh.integration.infrastructure.rest.dto.ProjectLabelDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectLabelMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectLabelMapper.toModel
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController
@@ -48,6 +49,11 @@ class ProjectLabelController(private val projectLabelService: ProjectLabelServic
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteById(@PathVariable id: String): Mono<Unit> {
         return projectLabelService.deleteById(id)
+    }
+
+    @GetMapping("/project/{id}")
+    fun findAllByProjectId(@PathVariable id: String): Flux<ProjectLabelDto> {
+        return projectLabelService.findAllByProjectId(id).map { it.toDto() }
     }
 
     @PatchMapping("/{id}")

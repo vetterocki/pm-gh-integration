@@ -2,6 +2,7 @@ package pm.gh.integration.application.service
 
 import pm.gh.integration.infrastructure.mongo.model.ProjectLabel
 import pm.gh.integration.infrastructure.rest.dto.ProjectLabelDto
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface ProjectLabelService {
@@ -11,4 +12,5 @@ interface ProjectLabelService {
     fun findById(id: String): Mono<ProjectLabel>
     fun update(id: String, projectLabelDto: ProjectLabelDto): Mono<ProjectLabel>
     fun getById(id: String): Mono<ProjectLabel>
+    fun findAllByProjectId(projectId: String): Flux<ProjectLabel>
 }

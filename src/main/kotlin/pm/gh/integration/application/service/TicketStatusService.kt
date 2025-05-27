@@ -10,4 +10,5 @@ interface TicketStatusService {
     fun deleteById(id: String): Mono<Unit>
     fun update(id: String, ticketStatusDto: TicketStatusDto): Mono<TicketStatus>
     fun getById(id: String): Mono<TicketStatus>
+    fun findByName(name: String): Mono<TicketStatus>
 }

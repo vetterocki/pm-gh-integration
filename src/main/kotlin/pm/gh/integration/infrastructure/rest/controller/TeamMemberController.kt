@@ -31,7 +31,6 @@ class TeamMemberController(private val teamMemberService: TeamMemberService) {
 
     @GetMapping
     fun findByName(@RequestParam teamMemberName: String): Mono<ResponseEntity<TeamMemberDto>> {
-        println("here")
         return teamMemberService.findByNameOrEmail(teamMemberName)
             .map { it.toDto() }
             .map { ResponseEntity.ok(it) }

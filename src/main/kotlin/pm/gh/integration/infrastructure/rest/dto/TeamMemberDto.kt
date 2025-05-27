@@ -7,5 +7,6 @@ data class TeamMemberDto(
     val email: String,
     val teamId: String,
     val position: String,
-    val loginInGithub: String
+    val loginInGithub: String,
+    val avatarUrl: String?
 )

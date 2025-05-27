@@ -16,7 +16,8 @@ data class TeamMember(
     val email: String,
     val teamId: ObjectId?,
     val loginInGithub: String,
-    val position: String, // sep class
+    val position: String,
+    val avatarUrl: String?,
 ) {
     companion object {
         const val COLLECTION_NAME = "team_members"

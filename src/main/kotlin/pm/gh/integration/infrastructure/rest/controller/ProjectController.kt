@@ -41,6 +41,14 @@ class ProjectController(private val projectService: ProjectService) {
         return projectService.findAll().map { it.toDto() }
     }
 
+    @GetMapping("/{id}")
+    fun findById(@PathVariable id: String): Mono<ResponseEntity<ProjectDto>> {
+        return projectService.findById(id)
+            .map { it.toDto() }
+            .map { ResponseEntity.ok(it) }
+            .defaultIfEmpty(ResponseEntity.notFound().build())
+    }
+
 
     @GetMapping
     fun findByName(@RequestParam projectName: String): Mono<ResponseEntity<ProjectDto>> {

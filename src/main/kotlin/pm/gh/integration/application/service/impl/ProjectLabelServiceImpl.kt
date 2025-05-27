@@ -2,15 +2,20 @@ package pm.gh.integration.application.service.impl
 
 import org.springframework.stereotype.Service
 import pm.gh.integration.application.service.ProjectLabelService
+import pm.gh.integration.application.service.ProjectService
 import pm.gh.integration.infrastructure.mongo.model.ProjectLabel
 import pm.gh.integration.infrastructure.mongo.repository.ProjectLabelRepository
 import pm.gh.integration.infrastructure.rest.dto.ProjectLabelDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectLabelMapper.partialUpdate
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
-class ProjectLabelServiceImpl(private val projectLabelRepository: ProjectLabelRepository) : ProjectLabelService {
+class ProjectLabelServiceImpl(
+    private val projectLabelRepository: ProjectLabelRepository,
+    private val projectService: ProjectService,
+) : ProjectLabelService {
     override fun create(projectLabel: ProjectLabel): Mono<ProjectLabel> {
         return projectLabelRepository.create(projectLabel)
     }
@@ -35,5 +40,11 @@ class ProjectLabelServiceImpl(private val projectLabelRepository: ProjectLabelRe
 
     override fun getById(id: String): Mono<ProjectLabel> {
         return findById(id).switchIfEmpty { Mono.error { RuntimeException("Project label not found by id $id") } }
+    }
+
+    override fun findAllByProjectId(projectId: String): Flux<ProjectLabel> {
+        return projectService.findById(projectId)
+            .mapNotNull { it.projectLabelIds }
+            .flatMapMany { projectLabelRepository.findAllByIdIn(it.orEmpty()) }
     }
 }

@@ -18,6 +18,7 @@ import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.domain.PullRequest
 import pm.gh.integration.domain.WorkflowRun
 import pm.gh.integration.infrastructure.mongo.model.Ticket
+import pm.gh.integration.infrastructure.mongo.model.TicketStatus
 import pm.gh.integration.infrastructure.mongo.repository.TicketRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -61,6 +62,14 @@ class TicketRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : T
         )
     }
 
+    override fun findAllByProjectId(projectId: String): Flux<Ticket> {
+        return mongoTemplate.find<Ticket>(
+            query(
+                where(Ticket::projectId.name).isEqualTo(projectId.toObjectId()),
+            ).with(Sort.by(Sort.Direction.ASC, Ticket::createdAt.name))
+        )
+    }
+
     override fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>> {
         return mongoTemplate.find<Ticket>(
             query(where(Ticket::projectBoardId.name).isEqualTo(projectBoardId.toObjectId()))
@@ -69,7 +78,7 @@ class TicketRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : T
             .collectMap({ it.key() }, { it })
     }
 
-    override fun updateTicketStatus(ticketIdentifier: String, status: String): Mono<Ticket> {
+    override fun updateTicketStatus(ticketIdentifier: String, status: TicketStatus): Mono<Ticket> {
         return updateTicketField(ticketIdentifier, Update().set(Ticket::status.name, status))
     }
 

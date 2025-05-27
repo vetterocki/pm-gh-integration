@@ -14,7 +14,8 @@ object TeamMemberMapper {
             teamId = teamId.toString(),
             position = position,
             loginInGithub = loginInGithub,
-            id = id.toString()
+            id = id.toString(),
+            avatarUrl = avatarUrl
         )
     }
 
@@ -27,7 +28,8 @@ object TeamMemberMapper {
             teamId = teamId.toObjectId(),
             position = position,
             fullName = "$firstName $lastName",
-            loginInGithub = loginInGithub
+            loginInGithub = loginInGithub,
+            avatarUrl = avatarUrl
         )
     }
 

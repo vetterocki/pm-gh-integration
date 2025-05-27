@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono
 class TeamController(private val teamService: TeamService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    // TODO separate DTO
     fun create(@Valid @RequestBody teamDto: TeamDto): Mono<TeamDto> {
         return teamService.create(
             teamDto.toModel(),
@@ -35,7 +36,6 @@ class TeamController(private val teamService: TeamService) {
 
     @GetMapping
     fun findByName(@RequestParam teamName: String): Mono<ResponseEntity<TeamDto>> {
-        println("inside find by team")
         return teamService.findByName(teamName)
             .map { it.toDto() }
             .map { ResponseEntity.ok(it) }

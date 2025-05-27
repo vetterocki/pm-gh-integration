@@ -4,11 +4,13 @@ import org.springframework.stereotype.Service
 import pm.gh.integration.application.service.ProjectService
 import pm.gh.integration.application.service.TeamMemberService
 import pm.gh.integration.application.service.TicketService
+import pm.gh.integration.application.service.TicketStatusService
 import pm.gh.integration.domain.Actor
 import pm.gh.integration.domain.PullRequest
 import pm.gh.integration.domain.WorkflowRun
 import pm.gh.integration.infrastructure.mongo.model.Ticket
 import pm.gh.integration.infrastructure.mongo.model.Ticket.Companion.SEQUENCE_NAME
+import pm.gh.integration.infrastructure.mongo.model.TicketStatus
 import pm.gh.integration.infrastructure.mongo.repository.TicketRepository
 import pm.gh.integration.infrastructure.mongo.repository.impl.DocumentSequenceHolder
 import pm.gh.integration.infrastructure.rest.dto.TicketUpdateDto
@@ -26,6 +28,7 @@ class TicketServiceImpl(
     private val projectService: ProjectService,
     private val teamMemberService: TeamMemberService,
     private val documentSequenceHolder: DocumentSequenceHolder,
+    private val ticketStatusService: TicketStatusService
 ) : TicketService {
 
     override fun create(ticket: Ticket, projectId: String, reporterId: String, assigneeId: String): Mono<Ticket> {
@@ -39,8 +42,8 @@ class TicketServiceImpl(
                     .map {
                         ticket.copy(
                             projectId = project.id,
-                            reporterId = reporter.id,
-                            assigneeId = assignee.id,
+                            reporter = reporter,
+                            assignee = assignee,
                             ticketIdentifier = "${project.key}-${it}"
                         )
                     }
@@ -72,12 +75,17 @@ class TicketServiceImpl(
         return ticketRepository.findAllByProjectBoardId(projectBoardId)
     }
 
+    override fun findAllByProjectId(projectId: String): Flux<Ticket> {
+        return ticketRepository.findAllByProjectId(projectId)
+    }
+
     override fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>> {
         return ticketRepository.findAllByProjectBoardIdGroupedByStatus(projectBoardId)
     }
 
     override fun updateTicketStatus(ticketIdentifier: String, status: String): Mono<Ticket> {
-        return ticketRepository.updateTicketStatus(ticketIdentifier, status)
+        return ticketStatusService.findByName(status)
+            .flatMap { ticketRepository.updateTicketStatus(ticketIdentifier, it) }
     }
 
     override fun updateTicketGithubDescription(

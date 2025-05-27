@@ -17,6 +17,7 @@ interface TicketService {
     fun findByTicketIdentifier(ticketIdentifier: String): Mono<Ticket>
     fun findAllByTicketIdentifierContaining(ticketIdentifier: String): Flux<Ticket>
     fun findAllByProjectBoardId(projectBoardId: String): Flux<Ticket>
+    fun findAllByProjectId(projectId: String): Flux<Ticket>
     fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>>
     fun updateTicketStatus(ticketIdentifier: String, status: String): Mono<Ticket>
     fun updateTicketGithubDescription(ticketIdentifier: String, githubDescription: String): Mono<Ticket>

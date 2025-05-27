@@ -34,6 +34,7 @@ class TicketStatusUpdateConsumer(
     }
 
     private fun performStatusUpdate(updateTicketStatusEvent: UpdateTicketStatusEvent): Mono<Ticket> {
+        println(updateTicketStatusEvent)
         return updateTicketStatusEvent.run {
             ticketService.updateTicketStatus(
                 ticketIdentifier = titleComposition.ticketIdentifier,
@@ -41,7 +42,7 @@ class TicketStatusUpdateConsumer(
             ).switchIfEmpty {
                 Mono.defer {
                     logger.warn(
-                        "No ticket {} found, skipping updating ticket status {}",
+                        "No ticket \n {} found, skipping updating ticket status {}",
                         titleComposition,
                         status
                     )

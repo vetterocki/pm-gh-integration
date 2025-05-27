@@ -27,6 +27,10 @@ class TicketStatusServiceImpl(private val ticketStatusRepository: TicketStatusRe
         return findById(id).switchIfEmpty { Mono.error { RuntimeException("Ticket status not found by id $id") } }
     }
 
+    override fun findByName(name: String): Mono<TicketStatus> {
+        return ticketStatusRepository.findByName(name)
+    }
+
     override fun update(id: String, ticketStatusDto: TicketStatusDto): Mono<TicketStatus> {
         return getById(id)
             .map { it.partialUpdate(ticketStatusDto) }
