@@ -5,6 +5,7 @@ import pm.gh.integration.application.service.ProjectService
 import pm.gh.integration.application.service.TeamMemberService
 import pm.gh.integration.application.service.TeamService
 import pm.gh.integration.infrastructure.mongo.model.Project
+import pm.gh.integration.infrastructure.mongo.model.ProjectLabel
 import pm.gh.integration.infrastructure.mongo.repository.ProjectRepository
 import pm.gh.integration.infrastructure.rest.dto.ProjectUpdateDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectMapper.partialUpdate
@@ -54,5 +55,19 @@ class ProjectServiceImpl(
 
     override fun findAll(): Flux<Project> {
         return projectRepository.findAll()
+    }
+
+    override fun addLabelToProject(
+        projectLabel: ProjectLabel,
+        projectId: String,
+    ): Mono<Unit> {
+        return projectRepository.addLabelToProject(projectLabel, projectId)
+    }
+
+    override fun removeLabelFromProject(
+        projectLabel: ProjectLabel,
+        projectId: String,
+    ): Mono<Unit> {
+       return projectRepository.removeLabelFromProject(projectLabel, projectId)
     }
 }

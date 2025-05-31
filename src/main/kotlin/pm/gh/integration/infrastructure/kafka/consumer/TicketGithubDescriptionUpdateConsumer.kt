@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono
 import reactor.kafka.receiver.KafkaReceiver
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
+import kotlin.math.log
 
 @Component
 class TicketGithubDescriptionUpdateConsumer(
@@ -24,6 +25,7 @@ class TicketGithubDescriptionUpdateConsumer(
     fun listenToTicketUpdateGithubDescriptionTopic() {
         kafkaReceiver.receive()
             .flatMap { receiverRecord ->
+                logger.info("Asf")
                 receiverRecord.toMono()
                     .map { UpdateTicketGithubDescriptionEvent.parseFrom(it.value()) }
                     .flatMap { performGithubDescriptionUpdate(it) }
@@ -34,6 +36,7 @@ class TicketGithubDescriptionUpdateConsumer(
     }
 
     private fun performGithubDescriptionUpdate(event: UpdateTicketGithubDescriptionEvent): Mono<Ticket> {
+        logger.info("Received event of type UpdateTicketGithubDescriptionEvent: ${event::class.simpleName}")
         return event.run {
             ticketService.updateTicketGithubDescription(
                 ticketIdentifier = titleComposition.ticketIdentifier,

@@ -66,7 +66,7 @@ class ProjectController(private val projectService: ProjectService) {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, projectUpdateDto: ProjectUpdateDto): Mono<ProjectDto> {
+    fun update(@PathVariable id: String, @RequestBody projectUpdateDto: ProjectUpdateDto): Mono<ProjectDto> {
         return projectService.update(id, projectUpdateDto).map { it.toDto() }
     }
 }

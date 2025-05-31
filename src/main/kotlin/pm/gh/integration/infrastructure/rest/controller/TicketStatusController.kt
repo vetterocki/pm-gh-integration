@@ -43,7 +43,7 @@ class TicketStatusController(private val ticketStatusService: TicketStatusServic
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, ticketStatusDto: TicketStatusDto): Mono<TicketStatusDto> {
+    fun update(@PathVariable id: String, @RequestBody ticketStatusDto: TicketStatusDto): Mono<TicketStatusDto> {
         return ticketStatusService.update(id, ticketStatusDto).map { it.toDto() }
     }
 }

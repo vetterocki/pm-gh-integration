@@ -31,6 +31,7 @@ object TicketMapper {
             ticketIdentifier = ticketIdentifier.orEmpty(),
             reporter = reporter?.toDto(),
             assignee = assignee?.toDto(),
+            reviewers = reviewerIds?.map { it.toString() },
         )
     }
 
@@ -45,17 +46,17 @@ object TicketMapper {
             priority = TicketPriority.valueOf(priority),
             status = TicketStatus(
                 id = null,
-                name = status
+                name = "TO_DO"
             ),
-            ticketIdentifier = ticketIdentifier,
             linkedPullRequests = null,
             linkedWorkflowRuns = null,
             reviewerIds = null,
             githubDescription = null,
             createdAt = Instant.now(),
-            labels = labels?.map { it.toModel() },
+            labels = null,
             reporter = null,
-            assignee = null
+            assignee = null,
+            ticketIdentifier = null
         )
     }
 
@@ -65,7 +66,7 @@ object TicketMapper {
             summary = ticketUpdateDto.summary ?: summary,
             description = ticketUpdateDto.description ?: description,
             linkedTicketIds = ticketUpdateDto.linkedTicketIds?.map { it.toObjectId() } ?: linkedTicketIds,
-            priority = ticketUpdateDto.priority?.let { TicketPriority.valueOf(it) } ?: priority,
+            priority = ticketUpdateDto.priority?.let { TicketPriority.valueOf(it.uppercase()) } ?: priority,
             status = ticketUpdateDto.status?.let {
                 TicketStatus(
                     id = null,

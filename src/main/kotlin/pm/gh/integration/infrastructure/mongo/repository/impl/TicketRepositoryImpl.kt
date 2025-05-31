@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.remove
 import org.springframework.stereotype.Repository
 import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.domain.PullRequest
@@ -30,13 +31,16 @@ class TicketRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : T
         return mongoTemplate.insert(ticket)
     }
 
+    override fun save(ticket: Ticket): Mono<Ticket> {
+        return mongoTemplate.save(ticket)
+    }
+
     override fun findById(ticketId: String): Mono<Ticket> {
         return mongoTemplate.findById(ticketId.toObjectId())
     }
 
     override fun deleteById(id: String): Mono<Unit> {
-        return mongoTemplate.remove(query(where(Fields.UNDERSCORE_ID).isEqualTo(id.toObjectId())))
-            .thenReturn(Unit)
+        return mongoTemplate.remove<Ticket>(query(where(Fields.UNDERSCORE_ID).isEqualTo(id.toObjectId()))).thenReturn(Unit)
     }
 
     override fun update(ticket: Ticket): Mono<Ticket> {
@@ -62,6 +66,13 @@ class TicketRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : T
         )
     }
 
+    override fun findAllByIdIn(ticketIds: List<String>): Flux<Ticket> {
+        return mongoTemplate.find<Ticket>(
+            query(
+                where(Fields.UNDERSCORE_ID).`in`(ticketIds.map { it.toObjectId() })
+            ).with(Sort.by(Sort.Direction.ASC, Ticket::ticketIdentifier.name)))
+    }
+
     override fun findAllByProjectId(projectId: String): Flux<Ticket> {
         return mongoTemplate.find<Ticket>(
             query(
@@ -73,9 +84,7 @@ class TicketRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : T
     override fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>> {
         return mongoTemplate.find<Ticket>(
             query(where(Ticket::projectBoardId.name).isEqualTo(projectBoardId.toObjectId()))
-        )
-            .groupBy { it.status.name }
-            .collectMap({ it.key() }, { it })
+        ).groupBy { it.status.name }.collectMap({ it.key() }, { it })
     }
 
     override fun updateTicketStatus(ticketIdentifier: String, status: TicketStatus): Mono<Ticket> {

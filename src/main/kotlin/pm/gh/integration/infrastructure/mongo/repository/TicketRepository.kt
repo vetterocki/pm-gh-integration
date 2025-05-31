@@ -10,12 +10,14 @@ import reactor.core.publisher.Mono
 
 interface TicketRepository {
     fun create(ticket: Ticket): Mono<Ticket>
+    fun save(ticket: Ticket): Mono<Ticket>
     fun findById(ticketId: String): Mono<Ticket>
     fun deleteById(id: String): Mono<Unit>
     fun update(ticket: Ticket): Mono<Ticket>
     fun findByTicketIdentifier(ticketIdentifier: String): Mono<Ticket>
     fun findAllByTicketIdentifierContaining(ticketIdentifier: String): Flux<Ticket>
     fun findAllByProjectBoardId(projectBoardId: String): Flux<Ticket>
+    fun findAllByIdIn(ticketIds: List<String>): Flux<Ticket>
     fun findAllByProjectId(projectId: String): Flux<Ticket>
     fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>>
     fun updateTicketStatus(ticketIdentifier: String, status: TicketStatus): Mono<Ticket>

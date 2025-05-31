@@ -16,6 +16,7 @@ data class TicketDto(
     val priority: String,
     val status: String,
     val labels: List<ProjectLabelDto>?,
+    val reviewers: List<String>?,
     val ticketIdentifier: String,
     val linkedPullRequests: List<PullRequest>?,
     val linkedWorkflowRuns: List<WorkflowRun>?,

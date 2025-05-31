@@ -12,4 +12,5 @@ interface ProjectLabelRepository {
     fun deleteById(id: String): Mono<Unit>
     fun update(updatedProjectLabel: ProjectLabel): Mono<ProjectLabel>
     fun findAllByIdIn(projectLabelIds: List<ObjectId>): Flux<ProjectLabel>
+    fun findAll(): Flux<ProjectLabel>
 }

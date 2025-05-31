@@ -18,6 +18,7 @@ import pm.gh.integration.infrastructure.rest.dto.TeamMemberDto
 import pm.gh.integration.infrastructure.rest.dto.TeamMemberUpdateDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMemberMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMemberMapper.toModel
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController
@@ -26,7 +27,13 @@ class TeamMemberController(private val teamMemberService: TeamMemberService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@Valid @RequestBody teamDto: TeamMemberDto): Mono<TeamMemberDto> {
-        return teamMemberService.create(teamDto.toModel()).map { it.toDto() }
+        println(teamDto)
+        return teamMemberService.create(teamDto.toModel(), teamDto.teamId).map { it.toDto() }
+    }
+
+    @GetMapping("/all")
+    fun findAll(): Flux<TeamMemberDto> {
+        return teamMemberService.findAll().map { it.toDto() }
     }
 
     @GetMapping
@@ -53,7 +60,7 @@ class TeamMemberController(private val teamMemberService: TeamMemberService) {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, teamMemberUpdateDto: TeamMemberUpdateDto): Mono<TeamMemberDto> {
+    fun update(@PathVariable id: String, @RequestBody teamMemberUpdateDto: TeamMemberUpdateDto): Mono<TeamMemberDto> {
         return teamMemberService.update(id, teamMemberUpdateDto).map { it.toDto() }
     }
 }

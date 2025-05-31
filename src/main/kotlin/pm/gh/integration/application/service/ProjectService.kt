@@ -1,6 +1,7 @@
 package pm.gh.integration.application.service
 
 import pm.gh.integration.infrastructure.mongo.model.Project
+import pm.gh.integration.infrastructure.mongo.model.ProjectLabel
 import pm.gh.integration.infrastructure.rest.dto.ProjectUpdateDto
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -14,4 +15,6 @@ interface ProjectService {
     fun findById(id: String): Mono<Project>
     fun getById(id: String): Mono<Project>
     fun findAll(): Flux<Project>
+    fun addLabelToProject(projectLabel: ProjectLabel, projectId: String): Mono<Unit>
+    fun removeLabelFromProject(projectLabel: ProjectLabel, projectId: String): Mono<Unit>
 }

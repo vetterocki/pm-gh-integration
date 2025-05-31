@@ -1,16 +1,18 @@
 package pm.gh.integration.application.service.impl
 
 import org.springframework.stereotype.Service
+import pm.gh.integration.application.service.ProjectBoardService
+import pm.gh.integration.application.service.ProjectLabelService
 import pm.gh.integration.application.service.ProjectService
 import pm.gh.integration.application.service.TeamMemberService
 import pm.gh.integration.application.service.TicketService
 import pm.gh.integration.application.service.TicketStatusService
+import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.domain.Actor
 import pm.gh.integration.domain.PullRequest
 import pm.gh.integration.domain.WorkflowRun
 import pm.gh.integration.infrastructure.mongo.model.Ticket
 import pm.gh.integration.infrastructure.mongo.model.Ticket.Companion.SEQUENCE_NAME
-import pm.gh.integration.infrastructure.mongo.model.TicketStatus
 import pm.gh.integration.infrastructure.mongo.repository.TicketRepository
 import pm.gh.integration.infrastructure.mongo.repository.impl.DocumentSequenceHolder
 import pm.gh.integration.infrastructure.rest.dto.TicketUpdateDto
@@ -28,25 +30,32 @@ class TicketServiceImpl(
     private val projectService: ProjectService,
     private val teamMemberService: TeamMemberService,
     private val documentSequenceHolder: DocumentSequenceHolder,
-    private val ticketStatusService: TicketStatusService
+    private val ticketStatusService: TicketStatusService,
+    private val projectBoardService: ProjectBoardService,
+    private val labelService: ProjectLabelService
 ) : TicketService {
 
-    override fun create(ticket: Ticket, projectId: String, reporterId: String, assigneeId: String): Mono<Ticket> {
+    override fun create(ticket: Ticket, projectId: String, projectBoardId: String, reporterId: String, labelIds: List<String>): Mono<Ticket> {
         return Mono.zip(
             projectService.getById(projectId),
             teamMemberService.getById(reporterId),
-            teamMemberService.getById(assigneeId)
+            projectBoardService.getById(projectBoardId)
         )
-            .flatMap { (project, reporter, assignee) ->
+            .flatMap { (project, reporter, projectBoard) ->
                 documentSequenceHolder.acquireSequenceCounter(SEQUENCE_NAME)
                     .map {
                         ticket.copy(
                             projectId = project.id,
                             reporter = reporter,
-                            assignee = assignee,
+                            projectBoardId = projectBoard.id,
                             ticketIdentifier = "${project.key}-${it}"
                         )
                     }
+            }
+            .flatMap { ticket ->
+                labelService.findAllByIdIn(labelIds.map { it.toObjectId() })
+                    .collectList()
+                    .map { ticket.copy(labels = it) }
             }
             .flatMap { ticketRepository.create(it) }
     }
@@ -77,6 +86,12 @@ class TicketServiceImpl(
 
     override fun findAllByProjectId(projectId: String): Flux<Ticket> {
         return ticketRepository.findAllByProjectId(projectId)
+    }
+
+    override fun findAllByIdIn(ticketId: String): Flux<Ticket> {
+        return findById(ticketId)
+            .map { it.linkedTicketIds?.map { it.toString() }.orEmpty() }
+            .flatMapMany { ticketRepository.findAllByIdIn(it) }
     }
 
     override fun findAllByProjectBoardIdGroupedByStatus(projectBoardId: String): Mono<Map<String, Flux<Ticket>>> {
@@ -134,6 +149,29 @@ class TicketServiceImpl(
             }
             .flatMap { ticketRepository.updateTicketWorkflowRuns(ticketIdentifier, workflowRun) }
     }
+
+    override fun assignTicket(
+        ticketId: String,
+        memberName: String,
+    ): Mono<Unit> {
+        return Mono.zip(
+            findById(ticketId),
+            teamMemberService.findByNameOrEmail(memberName)
+        )
+            .map { (ticket, member) -> ticket.copy(assignee = member) }
+            .flatMap { ticketRepository.save(it) }
+            .thenReturn(Unit)
+    }
+
+    override fun unassignTicket(
+        ticketId: String,
+    ): Mono<Unit> {
+        return findById(ticketId)
+            .map { it.copy(assignee = null) }
+            .flatMap { ticketRepository.save(it) }
+            .thenReturn(Unit)
+    }
+
 
     override fun update(id: String, ticketUpdateDto: TicketUpdateDto): Mono<Ticket> {
         return getById(id)

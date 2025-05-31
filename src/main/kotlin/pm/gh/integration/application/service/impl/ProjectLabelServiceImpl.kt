@@ -1,5 +1,6 @@
 package pm.gh.integration.application.service.impl
 
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import pm.gh.integration.application.service.ProjectLabelService
 import pm.gh.integration.application.service.ProjectService
@@ -16,8 +17,11 @@ class ProjectLabelServiceImpl(
     private val projectLabelRepository: ProjectLabelRepository,
     private val projectService: ProjectService,
 ) : ProjectLabelService {
-    override fun create(projectLabel: ProjectLabel): Mono<ProjectLabel> {
-        return projectLabelRepository.create(projectLabel)
+    override fun create(projectLabel: ProjectLabel, projectId: String): Mono<ProjectLabel> {
+        return projectService.findById(projectId)
+            .map { projectLabel.copy(projectId = it.id) }
+            .flatMap { projectLabelRepository.create(it) }
+            .flatMap { projectService.addLabelToProject(it, projectId).thenReturn(it) }
     }
 
     override fun findByName(labelName: String): Mono<ProjectLabel> {
@@ -46,5 +50,13 @@ class ProjectLabelServiceImpl(
         return projectService.findById(projectId)
             .mapNotNull { it.projectLabelIds }
             .flatMapMany { projectLabelRepository.findAllByIdIn(it.orEmpty()) }
+    }
+
+    override fun findAll(): Flux<ProjectLabel> {
+        return projectLabelRepository.findAll()
+    }
+
+    override fun findAllByIdIn(projectLabelIds: List<ObjectId>): Flux<ProjectLabel> {
+        return projectLabelRepository.findAllByIdIn(projectLabelIds)
     }
 }

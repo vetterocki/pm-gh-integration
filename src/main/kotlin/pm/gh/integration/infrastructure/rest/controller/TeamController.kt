@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import pm.gh.integration.application.service.TeamMemberService
 import pm.gh.integration.application.service.TeamService
 import pm.gh.integration.infrastructure.rest.dto.TeamDto
 import pm.gh.integration.infrastructure.rest.dto.TeamUpdateDto
@@ -23,10 +24,9 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/teams")
-class TeamController(private val teamService: TeamService) {
+class TeamController(private val teamService: TeamService, private val teamMemberService: TeamMemberService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    // TODO separate DTO
     fun create(@Valid @RequestBody teamDto: TeamDto): Mono<TeamDto> {
         return teamService.create(
             teamDto.toModel(),
@@ -63,7 +63,15 @@ class TeamController(private val teamService: TeamService) {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, teamUpdateDto: TeamUpdateDto): Mono<TeamDto> {
+    fun update(@PathVariable id: String, @RequestBody teamUpdateDto: TeamUpdateDto): Mono<TeamDto> {
         return teamService.update(id, teamUpdateDto).map { it.toDto() }
+    }
+
+    @DeleteMapping("/{id}/members/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteMember(@PathVariable id: String, @PathVariable memberId: String): Mono<Unit> {
+        return teamMemberService.findById(memberId)
+            .flatMap { teamService.removeMember(id, it) }
+            .thenReturn(Unit)
     }
 }

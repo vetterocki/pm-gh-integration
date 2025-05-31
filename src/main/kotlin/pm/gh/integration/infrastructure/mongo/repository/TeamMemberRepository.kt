@@ -13,4 +13,7 @@ interface TeamMemberRepository {
     fun findByGithubCredentials(actor: Actor): Mono<TeamMember>
     fun findByNameOrEmail(credential: String): Mono<TeamMember>
     fun findAllByTeamId(teamId: String): Flux<TeamMember>
+    fun findAllByIdIn(ticketIds: List<String>): Flux<TeamMember>
+    fun findAll(): Flux<TeamMember>
+    fun save(teamMember: TeamMember): Mono<TeamMember>
 }

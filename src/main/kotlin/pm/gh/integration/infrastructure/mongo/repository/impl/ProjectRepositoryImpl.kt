@@ -1,6 +1,7 @@
 package pm.gh.integration.infrastructure.mongo.repository.impl
 
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregate
 import org.springframework.data.mongodb.core.aggregation.Aggregation.lookup
@@ -10,15 +11,19 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation.project
 import org.springframework.data.mongodb.core.aggregation.Aggregation.unwind
 import org.springframework.data.mongodb.core.aggregation.Fields
 import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.findAndModify
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Query.query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.remove
 import org.springframework.stereotype.Repository
 import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.infrastructure.mongo.model.Project
+import pm.gh.integration.infrastructure.mongo.model.ProjectLabel
 import pm.gh.integration.infrastructure.mongo.model.Team
 import pm.gh.integration.infrastructure.mongo.repository.ProjectRepository
 import reactor.core.publisher.Flux
@@ -54,7 +59,7 @@ class ProjectRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : 
     }
 
     override fun deleteById(id: String): Mono<Unit> {
-        return mongoTemplate.remove(query(where(Fields.UNDERSCORE_ID).isEqualTo(id.toObjectId())))
+        return mongoTemplate.remove<Project>(query(where(Fields.UNDERSCORE_ID).isEqualTo(id.toObjectId())))
             .thenReturn(Unit)
     }
 
@@ -64,5 +69,27 @@ class ProjectRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : 
 
     override fun findById(id: String): Mono<Project> {
         return mongoTemplate.findById(id.toObjectId())
+    }
+
+    override fun addLabelToProject(
+        projectLabel: ProjectLabel,
+        projectId: String,
+    ): Mono<Unit> {
+        return mongoTemplate.findAndModify<Project>(
+            query(where(Fields.UNDERSCORE_ID).isEqualTo(projectId.toObjectId())),
+            Update().push(Project::projectLabelIds.name, projectLabel.id),
+            FindAndModifyOptions.options().returnNew(true)
+        ).thenReturn(Unit)
+    }
+
+    override fun removeLabelFromProject(
+        projectLabel: ProjectLabel,
+        projectId: String,
+    ): Mono<Unit> {
+        return mongoTemplate.findAndModify<Project>(
+            query(where(Fields.UNDERSCORE_ID).isEqualTo(projectId.toObjectId())),
+            Update().pull(Project::projectLabelIds.name, projectLabel.id),
+            FindAndModifyOptions.options().returnNew(true)
+        ).thenReturn(Unit)
     }
 }

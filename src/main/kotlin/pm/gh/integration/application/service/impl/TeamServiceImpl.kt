@@ -3,6 +3,7 @@ package pm.gh.integration.application.service.impl
 import org.springframework.stereotype.Service
 import pm.gh.integration.application.service.TeamService
 import pm.gh.integration.infrastructure.mongo.model.Team
+import pm.gh.integration.infrastructure.mongo.model.TeamMember
 import pm.gh.integration.infrastructure.mongo.repository.TeamMemberRepository
 import pm.gh.integration.infrastructure.mongo.repository.TeamRepository
 import pm.gh.integration.infrastructure.rest.dto.TeamUpdateDto
@@ -19,7 +20,7 @@ class TeamServiceImpl(
     override fun create(team: Team, projectManagerName: String): Mono<Team> {
         return teamMemberRepository.findByNameOrEmail(projectManagerName)
             .map { team.copy(projectManager = it) }
-            .flatMap { teamRepository.create(team) }
+            .flatMap { teamRepository.create(it) }
     }
 
     override fun findByName(name: String): Mono<Team> {
@@ -46,5 +47,23 @@ class TeamServiceImpl(
 
     override fun findAll(): Flux<Team> {
         return teamRepository.findAll()
+    }
+
+    override fun save(team: Team): Mono<Team> {
+        return teamRepository.save(team)
+    }
+
+    override fun addMember(
+        teamId: String,
+        teamMember: TeamMember,
+    ): Mono<Unit> {
+        return teamRepository.addMember(teamId, teamMember)
+    }
+
+    override fun removeMember(
+        teamId: String,
+        teamMember: TeamMember,
+    ): Mono<Unit> {
+        return teamRepository.removeMember(teamId, teamMember)
     }
 }

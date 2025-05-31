@@ -3,12 +3,14 @@ package pm.gh.integration.infrastructure.mongo.repository.impl
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
 import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.remove
 import org.springframework.stereotype.Repository
 import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.domain.Actor
@@ -28,7 +30,7 @@ class TeamMemberRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate)
     }
 
     override fun deleteById(teamMemberId: String): Mono<Unit> {
-        return mongoTemplate.remove(
+        return mongoTemplate.remove<TeamMember>(
             query(where(Fields.UNDERSCORE_ID).isEqualTo(teamMemberId.toObjectId()))
         ).thenReturn(Unit)
     }
@@ -54,7 +56,7 @@ class TeamMemberRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate)
             query(
                 Criteria().orOperator(
                     where(TeamMember::email.name).isEqualTo(credential),
-                    where(TeamMember::fullName.name).isEqualTo(credential)
+                    where(TeamMember::fullName.name).isEqualTo(credential),
                 )
             )
         )
@@ -68,5 +70,17 @@ class TeamMemberRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate)
                 ).isEqualTo(teamId.toObjectId())
             )
         )
+    }
+
+    override fun findAllByIdIn(ticketIds: List<String>): Flux<TeamMember> {
+        return mongoTemplate.find<TeamMember>(query(where(Fields.UNDERSCORE_ID).`in`(ticketIds.map { it.toObjectId() })))
+    }
+
+    override fun findAll(): Flux<TeamMember> {
+        return mongoTemplate.findAll<TeamMember>()
+    }
+
+    override fun save(teamMember: TeamMember): Mono<TeamMember> {
+        return mongoTemplate.save(teamMember)
     }
 }

@@ -28,7 +28,7 @@ object TeamMemberMapper {
             teamId = teamId.toObjectId(),
             position = position,
             fullName = "$firstName $lastName",
-            loginInGithub = loginInGithub,
+            loginInGithub = loginInGithub.orEmpty(),
             avatarUrl = avatarUrl
         )
     }
@@ -39,7 +39,9 @@ object TeamMemberMapper {
             lastName = dto.lastName ?: lastName,
             email = dto.email ?: email,
             teamId = dto.teamId?.toObjectId() ?: teamId,
-            position = dto.position ?: position
+            position = dto.position ?: position,
+            loginInGithub = dto.loginInGithub ?: loginInGithub,
+            avatarUrl = dto.avatarUrl ?: avatarUrl
         )
     }
 }

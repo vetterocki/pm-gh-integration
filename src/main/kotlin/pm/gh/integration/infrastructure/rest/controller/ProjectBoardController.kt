@@ -47,7 +47,7 @@ class ProjectBoardController(private val projectBoardService: ProjectBoardServic
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, projectBoardDto: ProjectBoardDto): Mono<ProjectBoardDto> {
+    fun update(@PathVariable id: String, @RequestBody projectBoardDto: ProjectBoardDto): Mono<ProjectBoardDto> {
         return projectBoardService.update(id, projectBoardDto).map { it.toDto() }
     }
 

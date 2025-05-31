@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.remove
 import org.springframework.stereotype.Repository
 import pm.gh.integration.application.util.toObjectId
 import pm.gh.integration.infrastructure.mongo.model.ProjectBoard
@@ -26,7 +27,7 @@ class ProjectBoardRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplat
     }
 
     override fun deleteById(id: String): Mono<Unit> {
-        return mongoTemplate.remove(query(where(Fields.UNDERSCORE_ID).isEqualTo(id.toObjectId())))
+        return mongoTemplate.remove<ProjectBoard>(query(where(Fields.UNDERSCORE_ID).isEqualTo(id.toObjectId())))
             .thenReturn(Unit)
     }
 

@@ -26,7 +26,10 @@ class ProjectLabelController(private val projectLabelService: ProjectLabelServic
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@Valid @RequestBody projectLabelDto: ProjectLabelDto): Mono<ProjectLabelDto> {
-        return projectLabelService.create(projectLabelDto.toModel()).let { it.map { created -> created.toDto() } }
+        return projectLabelService.create(
+            projectLabelDto.toModel(),
+            projectLabelDto.projectId.orEmpty()
+        ).let { it.map { created -> created.toDto() } }
     }
 
     @GetMapping
@@ -58,7 +61,12 @@ class ProjectLabelController(private val projectLabelService: ProjectLabelServic
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, projectLabelDto: ProjectLabelDto): Mono<ProjectLabelDto> {
+    fun update(@PathVariable id: String, @RequestBody projectLabelDto: ProjectLabelDto): Mono<ProjectLabelDto> {
         return projectLabelService.update(id, projectLabelDto).map { it.toDto() }
+    }
+
+    @GetMapping("/all")
+    fun findAll(): Flux<ProjectLabelDto> {
+        return projectLabelService.findAll().map { it.toDto() }
     }
 }

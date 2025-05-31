@@ -10,6 +10,9 @@ import pm.gh.integration.infrastructure.mongo.model.ProjectLabel.Companion.COLLE
 data class ProjectLabel(
     val id: ObjectId?,
     val name: String,
+    val color: String,
+    val description: String?,
+    val projectId: ObjectId?,
 ) {
     companion object {
         const val COLLECTION_NAME = "project_labels"
