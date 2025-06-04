@@ -16,6 +16,7 @@ import pm.gh.integration.application.service.TicketStatusService
 import pm.gh.integration.infrastructure.rest.dto.TicketStatusDto
 import pm.gh.integration.infrastructure.rest.mapper.TicketStatusMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.TicketStatusMapper.toModel
+import pm.gh.integration.infrastructure.security.annotations.HasAdminRole
 import reactor.core.publisher.Mono
 
 @RestController
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono
 class TicketStatusController(private val ticketStatusService: TicketStatusService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @HasAdminRole
     fun create(@Valid @RequestBody teamDto: TicketStatusDto): Mono<TicketStatusDto> {
         return ticketStatusService.create(teamDto.toModel()).let { it.map { created -> created.toDto() } }
     }
@@ -37,13 +39,16 @@ class TicketStatusController(private val ticketStatusService: TicketStatusServic
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @HasAdminRole
     fun deleteById(@PathVariable id: String): Mono<Unit> {
         return ticketStatusService.deleteById(id)
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @HasAdminRole
     fun update(@PathVariable id: String, @RequestBody ticketStatusDto: TicketStatusDto): Mono<TicketStatusDto> {
+
         return ticketStatusService.update(id, ticketStatusDto).map { it.toDto() }
     }
 }

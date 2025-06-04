@@ -18,6 +18,8 @@ import pm.gh.integration.infrastructure.rest.dto.ProjectDto
 import pm.gh.integration.infrastructure.rest.dto.ProjectUpdateDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.ProjectMapper.toModel
+import pm.gh.integration.infrastructure.security.annotations.HasAdminRole
+import pm.gh.integration.infrastructure.security.annotations.HasManagerRole
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -27,6 +29,7 @@ class ProjectController(private val projectService: ProjectService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @HasManagerRole
     fun create(@Valid @RequestBody projectDto: ProjectDto): Mono<ProjectDto> {
         return projectService.create(
             projectDto.toModel(),
@@ -60,12 +63,14 @@ class ProjectController(private val projectService: ProjectService) {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @HasAdminRole
     fun deleteById(@PathVariable id: String): Mono<Unit> {
         return projectService.deleteById(id)
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @HasManagerRole
     fun update(@PathVariable id: String, @RequestBody projectUpdateDto: ProjectUpdateDto): Mono<ProjectDto> {
         return projectService.update(id, projectUpdateDto).map { it.toDto() }
     }

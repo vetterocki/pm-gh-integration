@@ -34,7 +34,6 @@ class TicketStatusUpdateConsumer(
     }
 
     private fun performStatusUpdate(updateTicketStatusEvent: UpdateTicketStatusEvent): Mono<Ticket> {
-        println(updateTicketStatusEvent)
         return updateTicketStatusEvent.run {
             ticketService.updateTicketStatus(
                 ticketIdentifier = titleComposition.ticketIdentifier,

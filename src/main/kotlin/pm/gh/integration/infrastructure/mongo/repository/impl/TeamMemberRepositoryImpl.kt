@@ -83,4 +83,12 @@ class TeamMemberRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate)
     override fun save(teamMember: TeamMember): Mono<TeamMember> {
         return mongoTemplate.save(teamMember)
     }
+
+    override fun findByEmail(email: String): Mono<TeamMember> {
+        return mongoTemplate.findOne<TeamMember>(
+            query(
+                where(TeamMember::email.name).isEqualTo(email)
+            )
+        )
+    }
 }

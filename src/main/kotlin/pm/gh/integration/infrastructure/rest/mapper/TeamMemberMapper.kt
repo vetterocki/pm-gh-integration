@@ -15,7 +15,8 @@ object TeamMemberMapper {
             position = position,
             loginInGithub = loginInGithub,
             id = id.toString(),
-            avatarUrl = avatarUrl
+            avatarUrl = avatarUrl,
+            password = password.orEmpty()
         )
     }
 
@@ -29,7 +30,9 @@ object TeamMemberMapper {
             position = position,
             fullName = "$firstName $lastName",
             loginInGithub = loginInGithub.orEmpty(),
-            avatarUrl = avatarUrl
+            avatarUrl = avatarUrl,
+            password = password,
+            role = TeamMember.Role.DEFAULT
         )
     }
 

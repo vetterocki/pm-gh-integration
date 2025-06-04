@@ -11,3 +11,7 @@ spring:
       authentication-database: admin
       port: 27017
       host: localhost
+  security:
+    jwt:
+      secret: "0123456789ABCDEF0123456789ABCDEF"
+      expiration-in-seconds: 3600

@@ -8,5 +8,6 @@ data class TeamMemberDto(
     val teamId: String,
     val position: String,
     val loginInGithub: String?,
-    val avatarUrl: String?
+    val avatarUrl: String?,
+    val password: String
 )

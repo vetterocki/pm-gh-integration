@@ -16,4 +16,5 @@ interface TeamMemberRepository {
     fun findAllByIdIn(ticketIds: List<String>): Flux<TeamMember>
     fun findAll(): Flux<TeamMember>
     fun save(teamMember: TeamMember): Mono<TeamMember>
+    fun findByEmail(email: String): Mono<TeamMember>
 }

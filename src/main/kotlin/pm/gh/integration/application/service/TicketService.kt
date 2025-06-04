@@ -25,6 +25,6 @@ interface TicketService {
     fun updateTicketReviewers(ticketIdentifier: String, reviewers: List<Actor>): Mono<Ticket>
     fun updateTicketPullRequests(ticketIdentifier: String, pullRequest: PullRequest): Mono<Ticket>
     fun updateTicketWorkflowRuns(ticketIdentifier: String, workflowRun: WorkflowRun): Mono<Ticket>
-    fun assignTicket(ticketId: String, memberName: String): Mono<Unit>
+    fun assignTicket(ticketId: String, memberName: String): Mono<Ticket>
     fun unassignTicket(ticketId: String): Mono<Unit>
 }

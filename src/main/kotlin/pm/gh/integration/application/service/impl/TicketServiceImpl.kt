@@ -153,14 +153,13 @@ class TicketServiceImpl(
     override fun assignTicket(
         ticketId: String,
         memberName: String,
-    ): Mono<Unit> {
+    ): Mono<Ticket> {
         return Mono.zip(
             findById(ticketId),
             teamMemberService.findByNameOrEmail(memberName)
         )
             .map { (ticket, member) -> ticket.copy(assignee = member) }
             .flatMap { ticketRepository.save(it) }
-            .thenReturn(Unit)
     }
 
     override fun unassignTicket(

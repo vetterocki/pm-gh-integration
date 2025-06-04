@@ -1,5 +1,6 @@
 package pm.gh.integration.application.service.impl
 
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import pm.gh.integration.application.service.TeamMemberService
 import pm.gh.integration.application.service.TeamService
@@ -11,22 +12,25 @@ import pm.gh.integration.infrastructure.rest.mapper.TeamMemberMapper.partialUpda
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 
 @Service
 class TeamMemberServiceImpl(
     private val teamMemberRepository: TeamMemberRepository,
-    private val teamService: TeamService
+    private val teamService: TeamService,
 ) : TeamMemberService {
     override fun create(teamMember: TeamMember, teamId: String): Mono<TeamMember> {
         return teamService.findById(teamId)
             .map { teamMember.copy(teamId = it.id) }
             .flatMap { teamMemberRepository.create(it)}
             .flatMap { teamService. addMember(teamId, it).thenReturn(it) }
-
     }
 
-    override fun update(id: String, teamMemberUpdateDto: TeamMemberUpdateDto): Mono<TeamMember> {
-        return getById(id)
+    override fun update(id: String, teamMemberUpdateDto: TeamMemberUpdateDto, principal: String): Mono<TeamMember> {
+        return teamMemberUpdateDto.email.toMono()
+            .filter { it == principal }
+            .switchIfEmpty { Mono.error { AccessDeniedException("You are not authorized to access this user.") } }
+            .flatMap { getById(id) }
             .map { it.partialUpdate(teamMemberUpdateDto) }
             .flatMap { teamMemberRepository.update(it) }
     }
@@ -49,6 +53,10 @@ class TeamMemberServiceImpl(
 
     override fun findByNameOrEmail(credential: String): Mono<TeamMember> {
         return teamMemberRepository.findByNameOrEmail(credential)
+    }
+
+    override fun findByEmail(email: String): Mono<TeamMember> {
+        return teamMemberRepository.findByEmail(email)
     }
 
     override fun findAllByIdIn(ticketIds: List<String>): Flux<TeamMember> {

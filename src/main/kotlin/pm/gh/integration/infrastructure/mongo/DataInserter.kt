@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.security.crypto.password.PasswordEncoder
 import pm.gh.integration.application.service.ProjectBoardService
 import pm.gh.integration.application.service.ProjectLabelService
 import pm.gh.integration.application.service.ProjectService
@@ -23,6 +24,7 @@ import pm.gh.integration.infrastructure.mongo.model.ProjectBoard
 import pm.gh.integration.infrastructure.mongo.model.ProjectLabel
 import pm.gh.integration.infrastructure.mongo.model.Team
 import pm.gh.integration.infrastructure.mongo.model.TeamMember
+import pm.gh.integration.infrastructure.mongo.model.TeamMember.Role
 import pm.gh.integration.infrastructure.mongo.model.Ticket
 import pm.gh.integration.infrastructure.mongo.model.TicketStatus
 import java.time.Instant
@@ -38,6 +40,7 @@ class DataInserter(
     private val ticketStatusService: TicketStatusService,
     private val projectBoardService: ProjectBoardService,
     private val mongoTemplate: ReactiveMongoTemplate,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     private val faker = Faker()
@@ -106,7 +109,7 @@ class DataInserter(
             }
 
             repeat(10) { teamIndex ->
-                val projectManager = mongoTemplate.insert<TeamMember>(fakeTeamMember(null)).block()!!
+                val projectManager = mongoTemplate.insert<TeamMember>(fakeTeamMember(null, Role.MANAGER)).block()!!
 
                 val teamName = "Team ${faker.color.name()} ${UUID.randomUUID().toString().take(4)}"
                 val team = teamService.create(
@@ -124,7 +127,7 @@ class DataInserter(
                 }
 
                 val teamMembers = (1..8).map {
-                    teamMemberService.create(fakeTeamMember(team.id), team.id.toString()).block()!!
+                    teamMemberService.create(fakeTeamMember(team.id, Role.DEFAULT), team.id.toString()).block()!!
                 }
 
                 var updatedTeam = mongoTemplate.save(
@@ -254,7 +257,7 @@ class DataInserter(
         }
     }
 
-    private fun fakeTeamMember(teamId: ObjectId?): TeamMember {
+    private fun fakeTeamMember(teamId: ObjectId?, role: Role): TeamMember {
         val firstName = faker.name.firstName()
         val lastName = faker.name.lastName()
         return TeamMember(
@@ -266,7 +269,9 @@ class DataInserter(
             teamId = teamId,
             loginInGithub = faker.control.objectOfPower(),
             position = faker.job.position(),
-            avatarUrl = "https://i.pravatar.cc/150?u=${UUID.randomUUID()}"
+            avatarUrl = "https://i.pravatar.cc/150?u=${UUID.randomUUID()}",
+            password = passwordEncoder.encode("1"),
+            role = role
         )
     }
 

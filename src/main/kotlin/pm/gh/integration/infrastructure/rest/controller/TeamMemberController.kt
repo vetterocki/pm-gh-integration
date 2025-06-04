@@ -18,8 +18,10 @@ import pm.gh.integration.infrastructure.rest.dto.TeamMemberDto
 import pm.gh.integration.infrastructure.rest.dto.TeamMemberUpdateDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMemberMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMemberMapper.toModel
+import pm.gh.integration.infrastructure.security.annotations.HasManagerRole
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.security.Principal
 
 @RestController
 @RequestMapping("/members")
@@ -27,7 +29,6 @@ class TeamMemberController(private val teamMemberService: TeamMemberService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@Valid @RequestBody teamDto: TeamMemberDto): Mono<TeamMemberDto> {
-        println(teamDto)
         return teamMemberService.create(teamDto.toModel(), teamDto.teamId).map { it.toDto() }
     }
 
@@ -54,13 +55,18 @@ class TeamMemberController(private val teamMemberService: TeamMemberService) {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @HasManagerRole
     fun deleteById(@PathVariable id: String): Mono<Unit> {
         return teamMemberService.deleteById(id)
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, @RequestBody teamMemberUpdateDto: TeamMemberUpdateDto): Mono<TeamMemberDto> {
-        return teamMemberService.update(id, teamMemberUpdateDto).map { it.toDto() }
+    fun update(
+        @PathVariable id: String,
+        @RequestBody teamMemberUpdateDto: TeamMemberUpdateDto,
+        principal: Principal,
+    ): Mono<TeamMemberDto> {
+        return teamMemberService.update(id, teamMemberUpdateDto, principal.name).map { it.toDto() }
     }
 }

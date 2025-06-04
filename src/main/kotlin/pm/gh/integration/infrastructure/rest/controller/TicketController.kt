@@ -108,8 +108,8 @@ class TicketController(private val ticketService: TicketService, private val tea
 
     @PostMapping("/{id}/assign")
     @ResponseStatus(HttpStatus.OK)
-    fun assignTicket(@PathVariable id: String, @RequestParam memberName: String): Mono<Unit> {
-        return ticketService.assignTicket(id, memberName)
+    fun assignTicket(@PathVariable id: String, @RequestParam memberName: String): Mono<TicketDto> {
+        return ticketService.assignTicket(id, memberName).map { it.toDto() }
     }
 
     @PostMapping("/{id}/unassign")

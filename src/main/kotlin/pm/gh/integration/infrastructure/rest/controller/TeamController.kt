@@ -19,6 +19,8 @@ import pm.gh.integration.infrastructure.rest.dto.TeamDto
 import pm.gh.integration.infrastructure.rest.dto.TeamUpdateDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMapper.toDto
 import pm.gh.integration.infrastructure.rest.mapper.TeamMapper.toModel
+import pm.gh.integration.infrastructure.security.annotations.HasAdminRole
+import pm.gh.integration.infrastructure.security.annotations.HasManagerRole
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -27,6 +29,7 @@ import reactor.core.publisher.Mono
 class TeamController(private val teamService: TeamService, private val teamMemberService: TeamMemberService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @HasAdminRole
     fun create(@Valid @RequestBody teamDto: TeamDto): Mono<TeamDto> {
         return teamService.create(
             teamDto.toModel(),
@@ -57,18 +60,21 @@ class TeamController(private val teamService: TeamService, private val teamMembe
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @HasAdminRole
     fun deleteById(@PathVariable id: String): Mono<Unit> {
         return teamService.deleteById(id)
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @HasManagerRole
     fun update(@PathVariable id: String, @RequestBody teamUpdateDto: TeamUpdateDto): Mono<TeamDto> {
         return teamService.update(id, teamUpdateDto).map { it.toDto() }
     }
 
     @DeleteMapping("/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @HasManagerRole
     fun deleteMember(@PathVariable id: String, @PathVariable memberId: String): Mono<Unit> {
         return teamMemberService.findById(memberId)
             .flatMap { teamService.removeMember(id, it) }

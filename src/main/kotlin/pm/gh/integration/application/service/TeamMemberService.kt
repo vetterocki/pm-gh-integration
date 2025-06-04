@@ -8,12 +8,13 @@ import reactor.core.publisher.Mono
 
 interface TeamMemberService {
     fun create(teamMember: TeamMember, teamId: String): Mono<TeamMember>
-    fun update(id: String, teamMemberUpdateDto: TeamMemberUpdateDto): Mono<TeamMember>
+    fun update(id: String, teamMemberUpdateDto: TeamMemberUpdateDto, principal: String): Mono<TeamMember>
     fun deleteById(teamMemberId: String): Mono<Unit>
     fun findById(teamId: String): Mono<TeamMember>
     fun getById(id: String): Mono<TeamMember>
     fun findByGithubCredentials(actor: Actor): Mono<TeamMember>
     fun findByNameOrEmail(credential: String): Mono<TeamMember>
+    fun findByEmail(email: String): Mono<TeamMember>
     fun findAllByIdIn(ticketIds: List<String>): Flux<TeamMember>
     fun findAll(): Flux<TeamMember>
     fun save(teamMember: TeamMember): Mono<TeamMember>
